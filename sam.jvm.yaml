@@ -1,0 +1,64 @@
+  AWSTemplateFormatVersion: '2010-09-09'
+  Transform: AWS::Serverless-2016-10-31
+  Description: AWS Serverless Quarkus HTTP - com.amazon::LambdaQuarkus
+
+  Resources:
+    ApiGatewayApi:
+      Type: AWS::Serverless::Api
+      Properties:
+        Name: Api Gateway for Quarkus demo
+        StageName: prod
+
+    LambdaQuarkusFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest
+        Runtime: java11
+        CodeUri: target/LambdaQuarkus-1.0-SNAPSHOT-runner.jar
+        MemorySize: 256
+        Timeout: 15
+        Policies:
+          - DynamoDBCrudPolicy:
+              TableName: Customers
+        Events:
+          LambdaQuarkusGetAll:
+            Type: Api
+            Properties:
+              RestApiId: !Ref ApiGatewayApi
+              Path: /Customers
+              Method: GET
+          LambdaQuarkusGetCustomer:
+            Type: Api
+            Properties:
+              RestApiId: !Ref ApiGatewayApi
+              Path: /Customers/{CustomerId}
+              Method: GET
+          LambdaQuarkusDeleteCustomer:
+            Type: Api
+            Properties:
+              RestApiId: !Ref ApiGatewayApi
+              Path: /Customers/{CustomerId}
+              Method: DELETE
+          LambdaQuarkusAddCustomer:
+            Type: Api
+            Properties:
+              RestApiId: !Ref ApiGatewayApi
+              Path: /Customers
+              Method: POST
+
+    CustomersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Customers
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: CustomerId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: CustomerId
+            KeyType: HASH
+
+  Outputs:
+    ApiUrl:
+      Description: URL of the Customers listing in the prod stage
+      Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/prod/Customers"

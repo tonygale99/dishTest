@@ -1,0 +1,10 @@
+org\myDish\ProcessingLambda.class
+org\myDish\pojo\Customer.class
+org\myDish\service\AbstractService.class
+org\myDish\ProcessingService.class
+org\myDish\service\CustomerService.class
+org\myDish\OutputObject.class
+org\myDish\StreamLambda.class
+org\myDish\UnusedLambda.class
+org\myDish\InputObject.class
+org\myDish\TestLambda.class
