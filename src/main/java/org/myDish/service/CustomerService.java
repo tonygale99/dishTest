@@ -1,6 +1,7 @@
 package org.myDish.service;
 
 import org.myDish.pojo.Customer;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -10,8 +11,12 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class CustomerService extends AbstractService{
-    @Inject
-    DynamoDbClient dynamoDB;
+
+    Region region = Region.US_WEST_2;
+    DynamoDbClient dynamoDB = DynamoDbClient.builder()
+            .region(region)
+                .build();
+
 
     public List<Customer> findAll() {
         return dynamoDB.scanPaginator(scanRequest()).items().stream()

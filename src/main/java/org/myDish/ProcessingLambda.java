@@ -2,32 +2,55 @@ package org.myDish;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jboss.logging.Logger;
 import org.myDish.pojo.Customer;
 import org.myDish.service.CustomerService;
+import software.amazon.awssdk.utils.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.jboss.logging.Logger;
 
 @Named("processing")
-public class ProcessingLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class ProcessingLambda implements RequestStreamHandler {//implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private static final Logger LOGGER = Logger.getLogger(ProcessingLambda.class);
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    @Inject
-    CustomerService customerService;
+
+    CustomerService customerService = new CustomerService();
 
     @Override
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+    public void handleRequest(InputStream inputStream,
+                              OutputStream outputStream, Context context) throws IOException {
+        int cntBy = inputStream.available();
+        byte[] by = new byte[inputStream.available()];
+        int  input = inputStream.read(by);//IOUtils.toString(inputStream, "UTF-8");
+        String inStr = new String (by,"UTF-8");
+        Customer tmpCustomer = mapper.readValue(" {\"firstName\":\"Bharat\",\"lastName\":\"ramasamy\"}", Customer.class);
+        tmpCustomer.setCustomerId(createUserId());
+
+        LOGGER.info("POST: " + tmpCustomer);
+        String tmpId = customerService.add(tmpCustomer);
+        System.out.println(StringUtils.capitalize(inStr));
+
+        outputStream.write(("Raghu Orders - " + tmpId).getBytes());
+    }
+
+
+   /* public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
 
         Map<String, String> query = request.getQueryStringParameters();
 
@@ -38,10 +61,10 @@ public class ProcessingLambda implements RequestHandler<APIGatewayProxyRequestEv
         List<Customer> customerList;
 
         String httpMethod = request.getHttpMethod();
-
+        LOGGER.info(String.format("http method is:", httpMethod));
         Map<String, String> pathParameters = request.getPathParameters();
 
-        switch (httpMethod) {
+        switch (request.getHttpMethod()) {
 
             case "GET":
                 Map<String, String> queryStringParameters = request.getQueryStringParameters();
@@ -91,6 +114,10 @@ public class ProcessingLambda implements RequestHandler<APIGatewayProxyRequestEv
                 catch (JsonProcessingException exc) {
                     LOGGER.error(exc);
                 }
+                catch (java.io.IOException exc) {
+                    LOGGER.error(exc);
+                }
+
                 break;
             case "DELETE":
                 if (pathParameters != null) {
@@ -105,7 +132,7 @@ public class ProcessingLambda implements RequestHandler<APIGatewayProxyRequestEv
         }
 
         return new APIGatewayProxyResponseEvent().withBody(result).withStatusCode(200);
-    }
+    }*/
 
     private String createUserId() {
         return UUID.randomUUID().toString();
