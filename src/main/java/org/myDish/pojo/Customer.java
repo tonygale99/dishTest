@@ -1,13 +1,13 @@
 package org.myDish.pojo;
 
 
-import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.myDish.service.AbstractService;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+
 import java.util.Map;
 import java.util.Objects;
 
-@RegisterForReflection
+
 public class Customer {
     private String customerId;
 

@@ -1,20 +1,22 @@
 package org.myDish.service;
 
 import org.myDish.pojo.Customer;
+import software.amazon.awssdk.http.SdkHttpClient;
+import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ApplicationScoped
+
 public class CustomerService extends AbstractService{
 
+    SdkHttpClient httpClient = UrlConnectionHttpClient.builder().
+            build();
     Region region = Region.US_WEST_2;
     DynamoDbClient dynamoDB = DynamoDbClient.builder()
-            .region(region)
+            .region(region).httpClient(httpClient)
                 .build();
 
 
