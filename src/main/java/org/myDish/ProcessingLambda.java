@@ -10,6 +10,7 @@ import org.jboss.logging.Logger;
 import org.myDish.pojo.Customer;
 import org.myDish.service.CustomerService;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class ProcessingLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private static final Logger LOGGER = Logger.getLogger(ProcessingLambda.class);
+
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -109,12 +111,9 @@ public class ProcessingLambda implements RequestHandler<APIGatewayProxyRequestEv
         return new APIGatewayProxyResponseEvent().withBody(result).withStatusCode(200);
     }
 
-    private String createUserId() {
+    private static String createUserId() {
         return UUID.randomUUID().toString();
     }
 
-    public static void main (String[] ars) {
-        ProcessingLambda processingLambda = new ProcessingLambda();
-        System.out.println("get in main method");
-    }
+
 }
